@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>reCORd Doctor's Client</title>
+        
+        <!-- Import crucial libraries -->
+        <link rel="stylesheet" type="text/css" href="ext_lib/bootstrap/css/bootstrap.min.css">
+        <script src="ext_lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="ext_lib/jquery/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/css/login.css">
+        
+    </head>
+    <body>
+        <div class="container">
+            <div class="col-md-12">
+                <center>
+                    <img src="lib/img/logo.png" style="height: 10%; width: 10%; padding-top: 20px;">
+                </center>
+                <div class="text-center" style="padding:50px 0">
+                    <div class="logo">reCORd :: doctor's client</div>
+                    <!-- Main Form -->
+                    <div class="login-form-1">
+                        <form action="http://127.0.0.1:8080/plot" method="post" id="login-form" class="text-left">
+                            <div class="login-form-main-message"></div>
+                            <div class="main-login-form">
+                                <div class="login-group">
+                                    <div class="form-group">
+                                        <label for="lg_patientid" class="sr-only">Patient's ID</label>
+                                        <input type="text" class="form-control" id="lg_patientid" name="lg_patientid" placeholder="Patient's ID">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lg_password" class="sr-only">Your key</label>
+                                        <input type="password" class="form-control" id="lg_password" name="lg_password" placeholder="Your key">
+                                    </div>
+                                </div>
+                                <button type="submit" class="login-button"><div class="glyphicon glyphicon-play-circle"></div></button>
+                            </div>
+                        </form>
+                    </div>
+                <!-- end:Main Form -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Importing other libraries -->
+        <script src="lib/js/index.js"></script>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
+    </body>
+</html>
