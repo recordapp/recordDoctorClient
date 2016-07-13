@@ -16,41 +16,9 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
         
         <script>
-
-            var margin = {top: 20, right: 80, bottom: 30, left: 50},
-                width = 960 - margin.left - margin.right,
-                height = 500 - margin.top - margin.bottom;
-
-            var parseDate = d3.time.format("%Y%m%d").parse;
-
-            var x = d3.time.scale()
-                .range([0, width]);
-
-            var y = d3.scale.linear()
-                .range([height, 0]);
-
-            var color = d3.scale.category10();
-
-            var xAxis = d3.svg.axis()
-                .scale(x)
-                .orient("bottom");
-
-            var yAxis = d3.svg.axis()
-                .scale(y)
-                .orient("left");
-
-            var line = d3.svg.line()
-                .interpolate("basis")
-                .x(function(d) { return x(d.date); })
-                .y(function(d) { return y(d.temperature); });
-
-            var svg = d3.select("#graphSection").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
             
             var username = "medrockweek1";
             var password = "medrockweek1";
@@ -73,76 +41,110 @@
             }
 
             
-            var aql = "select a from EHR e contains COMPOSITION a[openEHR-EHR-COMPOSITION.encounter.v1] where a/name/value='Encounter' offset 0 limit 100";
+            var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude as Weight_magnitude,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude as Total_water_percentage_magnitude,     a_a/data[at0002]/origin/value from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) offset 0 limit 100";
+            
             var sessionId = getSessionId();
-   
+            
+            function removeChars(toEdit) {
+                toEdit.substring(0, 10);
+                toEdit.replace("-","");
+                return toEdit;
+            }
+            
+            function findDate(object) {
+                for (var i = 0; i < object.length; i++) {
+                    if (object[i].key == "#2") {
+                        return object[i].value;
+                    }
+                }
+            }
+
+            var podatki;
+            
             $.ajax({
                 url: baseUrl + "/query?" + $.param({"aql": aql}),
                 type: 'GET',
                 headers: {"Ehr-Session": sessionId},
                 success: function (res) {
-                    console.log(res);
+                    
+                        podatki = res;
+                    
+                        var chart = new CanvasJS.Chart("graphSection",  {
+                            title:{
+                            text: "Multi-Series Line Chart"  
+                            },
+                            // data: podatki
+                            data: [
+                              {        
+                                type: "line",
+                                dataPoints: [
+                                { x: 10, y: 21 },
+                                { x: 20, y: 25},
+                                { x: 30, y: 20 },
+                                { x: 40, y: 25 },
+                                { x: 50, y: 27 },
+                                { x: 60, y: 28 },
+                                { x: 70, y: 28 },
+                                { x: 80, y: 24 },
+                                { x: 90, y: 26}
+
+                                ]
+                              },
+                                {        
+                                type: "line",
+                                dataPoints: [
+                                { x: 10, y: 31 },
+                                { x: 20, y: 35},
+                                { x: 30, y: 30 },
+                                { x: 40, y: 35 },
+                                { x: 50, y: 35 },
+                                { x: 60, y: 38 },
+                                { x: 70, y: 38 },
+                                { x: 80, y: 34 },
+                                { x: 90, y: 44}
+
+                                ]
+                              },
+                                {        
+                                type: "line",
+                                dataPoints: [
+                                { x: 10, y: 45 },
+                                { x: 20, y: 50},
+                                { x: 30, y: 40 },
+                                { x: 40, y: 45 },
+                                { x: 50, y: 45 },
+                                { x: 60, y: 48 },
+                                { x: 70, y: 43 },
+                                { x: 80, y: 41 },
+                                { x: 90, y: 28}
+
+                                ]
+                              },
+                                {        
+                                type: "line",
+                                dataPoints: [
+                                { x: 10, y: 71 },
+                                { x: 20, y: 55},
+                                { x: 30, y: 50 },
+                                { x: 40, y: 65 },
+                                { x: 50, y: 95 },
+                                { x: 60, y: 68 },
+                                { x: 70, y: 28 },
+                                { x: 80, y: 34 },
+                                { x: 90, y: 14}
+
+                                ]
+                              }
+                            ]
+
+                        });
+
+                        chart.render();
                 }
             });
-
-            d3.tsv("data.tsv", function(error, data) {
-              if (error) throw error;
-
-              color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
-
-              data.forEach(function(d) {
-                d.date = parseDate(d.date);
-              });
-
-              var cities = color.domain().map(function(name) {
-                return {
-                  name: name,
-                  values: data.map(function(d) {
-                    return {date: d.date, temperature: +d[name]};
-                  })
-                };
-              });
-
-              x.domain(d3.extent(data, function(d) { return d.date; }));
-
-              y.domain([
-                d3.min(cities, function(c) { return d3.min(c.values, function(v) { return v.temperature; }); }),
-                d3.max(cities, function(c) { return d3.max(c.values, function(v) { return v.temperature; }); })
-              ]);
-
-              svg.append("g")
-                  .attr("class", "x axis")
-                  .attr("transform", "translate(0," + height + ")")
-                  .call(xAxis);
-
-              svg.append("g")
-                  .attr("class", "y axis")
-                  .call(yAxis)
-                .append("text")
-                  .attr("transform", "rotate(-90)")
-                  .attr("y", 6)
-                  .attr("dy", ".71em")
-                  .style("text-anchor", "end")
-                  .text("Mass (kg)");
-
-              var city = svg.selectAll(".city")
-                  .data(cities)
-                .enter().append("g")
-                  .attr("class", "city");
-
-              city.append("path")
-                  .attr("class", "line")
-                  .attr("d", function(d) { return line(d.values); })
-                  .style("stroke", function(d) { return color(d.name); });
-
-              city.append("text")
-                  .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-                  .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
-                  .attr("x", 3)
-                  .attr("dy", ".35em")
-                  .text(function(d) { return d.name; });
-            });
-
+            
+           
+            
             </script>
 
         
