@@ -13,7 +13,6 @@
         
         
         <!-- Importing other libraries -->
-        <script src="plot.js"></script>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
@@ -52,6 +51,39 @@
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            
+            var username = "medrockweek1";
+            var password = "medrockweek1";
+
+            // api query urls
+            var baseUrl = 'https://rest.ehrscape.com/rest/v1';
+            var queryUrl = baseUrl + '/query';
+
+            // Gets the sessionID from our username and password (even though it supposedly doesn't work).
+
+            function getSessionId() {
+
+                var response = $.ajax({
+                    type: "POST",
+                    url: baseUrl + "/session?username=" + encodeURIComponent(username) +
+                            "&password=" + encodeURIComponent(password),
+                    async: false
+                });
+                return response.responseJSON.sessionId;
+            }
+
+            
+            var aql = "select a from EHR e contains COMPOSITION a[openEHR-EHR-COMPOSITION.encounter.v1] where a/name/value='Encounter' offset 0 limit 100";
+            var sessionId = getSessionId();
+   
+            $.ajax({
+                url: baseUrl + "/query?" + $.param({"aql": aql}),
+                type: 'GET',
+                headers: {"Ehr-Session": sessionId},
+                success: function (res) {
+                    console.log(res);
+                }
+            });
 
             d3.tsv("data.tsv", function(error, data) {
               if (error) throw error;

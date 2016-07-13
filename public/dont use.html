@@ -51,6 +51,9 @@
             </div>
         </div>
         
+        <div id="header">
+        </div>
+        
         
         
         <!-- Importing other libraries -->
@@ -93,6 +96,11 @@
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            
+            // get req
+
+
+            // pisi data v tsv
 
             d3.tsv("data.tsv", function(error, data) {
               if (error) throw error;

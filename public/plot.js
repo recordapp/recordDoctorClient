@@ -54,5 +54,5 @@ $( document ).ready(function() {
     }
     
     // test of our ehrid
-    get(ehrId);
+    // get(ehrId);
 });
