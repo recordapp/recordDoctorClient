@@ -6,6 +6,7 @@
         <div class="row">
             <div class="container">
                 <div class="col-md-12" id="graphSection">
+                    <div id="chartContainer" style="height: 300px; width: 100%;">
                 </div>
             </div>
         </div>
@@ -69,79 +70,93 @@
                     
                         podatki = res;
                     
-                        var chart = new CanvasJS.Chart("graphSection",  {
-                            title:{
-                            text: "Multi-Series Line Chart"  
-                            },
-                            // data: podatki
-                            data: [
-                              {        
-                                type: "line",
-                                dataPoints: [
-                                { x: 10, y: 21 },
-                                { x: 20, y: 25},
-                                { x: 30, y: 20 },
-                                { x: 40, y: 25 },
-                                { x: 50, y: 27 },
-                                { x: 60, y: 28 },
-                                { x: 70, y: 28 },
-                                { x: 80, y: 24 },
-                                { x: 90, y: 26}
-
-                                ]
-                              },
-                                {        
-                                type: "line",
-                                dataPoints: [
-                                { x: 10, y: 31 },
-                                { x: 20, y: 35},
-                                { x: 30, y: 30 },
-                                { x: 40, y: 35 },
-                                { x: 50, y: 35 },
-                                { x: 60, y: 38 },
-                                { x: 70, y: 38 },
-                                { x: 80, y: 34 },
-                                { x: 90, y: 44}
-
-                                ]
-                              },
-                                {        
-                                type: "line",
-                                dataPoints: [
-                                { x: 10, y: 45 },
-                                { x: 20, y: 50},
-                                { x: 30, y: 40 },
-                                { x: 40, y: 45 },
-                                { x: 50, y: 45 },
-                                { x: 60, y: 48 },
-                                { x: 70, y: 43 },
-                                { x: 80, y: 41 },
-                                { x: 90, y: 28}
-
-                                ]
-                              },
-                                {        
-                                type: "line",
-                                dataPoints: [
-                                { x: 10, y: 71 },
-                                { x: 20, y: 55},
-                                { x: 30, y: 50 },
-                                { x: 40, y: 65 },
-                                { x: 50, y: 95 },
-                                { x: 60, y: 68 },
-                                { x: 70, y: 28 },
-                                { x: 80, y: 34 },
-                                { x: 90, y: 14}
-
-                                ]
-                              }
-                            ]
-
-                        });
-
-                        chart.render();
                 }
             });
+            
+            window.onload = function () {
+                var chart = new CanvasJS.Chart("graphSection", {
+                    title: {
+                        text: "Site Traffic",
+                        fontSize: 30
+                    },
+                    animationEnabled: true,
+                    axisX: {
+                        gridColor: "Silver",
+                        tickColor: "silver",
+                        valueFormatString: "DD/MMM"
+                    },
+                    toolTip: {
+                        shared: true
+                    },
+                    theme: "theme2",
+                    axisY: {
+                        gridColor: "Silver",
+                        tickColor: "silver"
+                    },
+                    legend: {
+                        verticalAlign: "center",
+                        horizontalAlign: "right"
+                    },
+                    data: [
+                    {
+                        type: "line",
+                        showInLegend: true,
+                        lineThickness: 2,
+                        name: "Visits",
+                        markerType: "square",
+                        color: "#F08080",
+                        dataPoints: [
+                        { x: new Date(2010, 0, 3), y: 650 },
+                        { x: new Date(2010, 0, 5), y: 700 },
+                        { x: new Date(2010, 0, 7), y: 710 },
+                        { x: new Date(2010, 0, 9), y: 658 },
+                        { x: new Date(2010, 0, 11), y: 734 },
+                        { x: new Date(2010, 0, 13), y: 963 },
+                        { x: new Date(2010, 0, 15), y: 847 },
+                        { x: new Date(2010, 0, 17), y: 853 },
+                        { x: new Date(2010, 0, 19), y: 869 },
+                        { x: new Date(2010, 0, 21), y: 943 },
+                        { x: new Date(2010, 0, 23), y: 970 }
+                        ]
+                    },
+                    {
+                        type: "line",
+                        showInLegend: true,
+                        name: "Unique Visits",
+                        color: "#20B2AA",
+                        lineThickness: 2,
+
+                        dataPoints: [
+                        { x: new Date(2010, 0, 3), y: 510 },
+                        { x: new Date(2010, 0, 5), y: 560 },
+                        { x: new Date(2010, 0, 7), y: 540 },
+                        { x: new Date(2010, 0, 9), y: 558 },
+                        { x: new Date(2010, 0, 11), y: 544 },
+                        { x: new Date(2010, 0, 13), y: 693 },
+                        { x: new Date(2010, 0, 15), y: 657 },
+                        { x: new Date(2010, 0, 17), y: 663 },
+                        { x: new Date(2010, 0, 19), y: 639 },
+                        { x: new Date(2010, 0, 21), y: 673 },
+                        { x: new Date(2010, 0, 23), y: 660 }
+                        ]
+                    }
+                    ],
+                    legend: {
+                        cursor: "pointer",
+                        itemclick: function (e) {
+                            if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                                e.dataSeries.visible = false;
+                            }
+                            else {
+                                e.dataSeries.visible = true;
+                            }
+                            chart.render();
+                        }
+                    }
+                });
+
+                chart.render();
+            }
             
            
             
