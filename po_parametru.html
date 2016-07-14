@@ -1,13 +1,12 @@
 </i></p>
                 </div>
                 <div class="col-md-4 text-center">
-                    <p>Enter date:</p>
+                    <p class="text-muted">Select earliest date:</p>
                     <input type="text" id="dateInput">
-                    <button class="btn-success" type="button" id="queryStart">GO!</button>
                 </div>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="container">
                 <div class="col-md-12" id="graphSection" style="min-height:500px;height: 100%;width: 100%;margin:auto;background:#fff;text-align:center">
@@ -15,9 +14,9 @@
                 </div>
             </div>
         </div>
-        
-        
-        
+
+
+
         <!-- Importing other libraries -->
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
@@ -29,9 +28,9 @@
         <link rel="stylesheet" href="lib/js/pickadate/lib/themes/classic.css">
         <link rel="stylesheet" href="lib/js/pickadate/lib/themes/classic.date.css">
         <link rel="stylesheet" href="lib/js/pickadate/lib/themes/classic.time.css">
-        
+
         <script>
-            
+
             var username = "medrockweek1";
             var password = "medrockweek1";
 
@@ -51,19 +50,19 @@
                 });
                 return response.responseJSON.sessionId;
             }
-            
+
             var sessionId = getSessionId();
-            
+
             // date parsing from EHR format to human readable :D
-            
+
             function removeChars(toEdit) {
                 toEdit.substring(0, 10);
                 toEdit.replace("-","");
                 return toEdit;
             }
-            
+
             // searching method to find which attribute the date actually is
-            
+
             function findDate(object) {
                 for (var i = 0; i < object.length; i++) {
                     if (object[i].key == "#2") {
@@ -72,107 +71,100 @@
                 }
             }
 
-            var podatki;
             var dateToQuery = "2016-07-13T09:57:26.346+02:00";
-            
+
+
+                        // AQL Query
+
+                        var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'" + dateToQuery + "' offset 0 limit 10";
+
             var buttonToQuery = $('#queryStart');
-            
-            $('#dateInput').pickadate({
-                onSet: function() {
-                    dateToQuery = picker.get('select', 'yyyy/mm/dd');
-                    dateToQuery.replace("/","-");
-                    dateToQuery += "T00:00:00.000+02:00";
-                    queryAgain();
-                    drawChart();
-                }
+
+            var $input = $('#dateInput').pickadate();
+            var picker = $input.pickadate('picker');
+
+            picker.on("set", function() {
+              dateToQuery = picker.get('select', 'yyyy/mm/dd');
+              dateToQuery = dateToQuery.split('/').join('-');
+              dateToQuery += "T00:00:00.000+02:00";
+              aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'" + dateToQuery + "' offset 0 limit 10";
+              query();
+              drawChart();
             });
-            
-            // AQL Query
-            
-            var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'" + dateToQuery + "' offset 0 limit 10";
-            
+
             // GET Request for AQL Query
-            
-            function queryAgain() {
+
+            function query() {
                 $.ajax({
                     url: baseUrl + "/query?" + $.param({"aql": aql}),
                     type: 'GET',
                     headers: {"Ehr-Session": sessionId},
                     success: function (res) {
 
-                            podatki = generateData(res);
+                            generateData(res);
 
                     }
                 });
             }
-            
-            $.ajax({
-                url: baseUrl + "/query?" + $.param({"aql": aql}),
-                type: 'GET',
-                headers: {"Ehr-Session": sessionId},
-                success: function (res) {
-                    
-                        podatki = generateData(res);
-                    
-                }
-            });
-            
+
+            query();
+
             // makes the date more readable
-            
+
             function oklestiDatum(date) {
                 date = date.replace("T"," ").replace("","");
                 date = date.substring(0,16);
                 return date;
             }
-            
-            
+
+
             function vrniCas(res, num) {
 
                 var tren = res[num];
                 tren = tren["#1"];
                 tren = tren.value;
                 tren = oklestiDatum(tren);
-                
-                return tren;             
+
+                return tren;
             }
-            
+
             function vrniTezo(res, num) {
-                
+
                 var tren = res[num];
                 tren = tren["Weight"];
                 return tren.magnitude;
-                
+
             }
-            
+
             function vrniVodo(res, num) {
-                
+
                 var tren = res[num];
                 tren = tren["Total_water_percentage"];
                 return tren.magnitude;
             }
-            
-            var plotArray = [['Date', 'Water Percentage', 'Weight']];
-            
-            function generateData(res) {
-                res = res.resultSet;
 
+            var plotArray = [['Date', 'Water weight', 'Weight']];
+
+            function generateData(res) {
+
+                res = res.resultSet;
+                plotArray = [['Date', 'Water weight', 'Weight']]
                 for(var i = 0; i < res.length; i++) {
                     var cas = vrniCas(res, i);
                     var teza = vrniTezo(res, i);
                     var voda = (teza*vrniVodo(res, i)) / 100;
-                    
                     var currentArray = [cas, voda, teza];
-                    
+
                     plotArray.push(currentArray);
-                    
+
                     // console.log(vrniCas(res, i));
                     // console.log(vrniTezo(res, i));
                     // console.log(vrniVodo(res, i));
-                    
+
                 }
                 console.log(plotArray);
             }
-            
+
             google.charts.load('current', {'packages':['corechart']});
             google.charts.setOnLoadCallback(drawChart);
 
@@ -186,12 +178,12 @@
                 };
 
                 var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
+                console.log("New graph is drawn");
                 chart.draw(data, options);
             }
-            
+
             </script>
 
-        
+
     </body>
 </html>
