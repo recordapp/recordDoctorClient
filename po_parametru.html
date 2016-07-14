@@ -5,8 +5,8 @@
         
         <div class="row">
             <div class="container">
-                <div class="col-md-12" id="graphSection">
-                    <div id="chartContainer" style="height: 300px; width: 100%;">
+                <div class="col-md-12" id="graphSection" style="min-height:500px;height: 100%;width: 100%;margin:auto;background:#fff;text-align:center">
+                    <div id="curve_chart" style="min-height:500px;height: 100%;width: 100%;margin:auto;background:#fff;text-align:center"></div>
                 </div>
             </div>
         </div>
@@ -17,7 +17,7 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
         
         <script>
             
@@ -40,17 +40,18 @@
                 });
                 return response.responseJSON.sessionId;
             }
-
-            
-            var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude as Weight_magnitude,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude as Total_water_percentage_magnitude,     a_a/data[at0002]/origin/value from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) offset 0 limit 100";
             
             var sessionId = getSessionId();
+            
+            // date parsing from EHR format to human readable :D
             
             function removeChars(toEdit) {
                 toEdit.substring(0, 10);
                 toEdit.replace("-","");
                 return toEdit;
             }
+            
+            // searching method to find which attribute the date actually is
             
             function findDate(object) {
                 for (var i = 0; i < object.length; i++) {
@@ -62,103 +63,95 @@
 
             var podatki;
             
+            // AQL Query
+            
+            var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'2016-07-13T09:57:26.346+02:00' offset 0 limit 10";
+            
+            // GET Request for AQL Query
+            
             $.ajax({
                 url: baseUrl + "/query?" + $.param({"aql": aql}),
                 type: 'GET',
                 headers: {"Ehr-Session": sessionId},
                 success: function (res) {
                     
-                        podatki = res;
+                        podatki = generateData(res);
                     
                 }
             });
             
-            window.onload = function () {
-                var chart = new CanvasJS.Chart("graphSection", {
-                    title: {
-                        text: "Site Traffic",
-                        fontSize: 30
-                    },
-                    animationEnabled: true,
-                    axisX: {
-                        gridColor: "Silver",
-                        tickColor: "silver",
-                        valueFormatString: "DD/MMM"
-                    },
-                    toolTip: {
-                        shared: true
-                    },
-                    theme: "theme2",
-                    axisY: {
-                        gridColor: "Silver",
-                        tickColor: "silver"
-                    },
-                    legend: {
-                        verticalAlign: "center",
-                        horizontalAlign: "right"
-                    },
-                    data: [
-                    {
-                        type: "line",
-                        showInLegend: true,
-                        lineThickness: 2,
-                        name: "Visits",
-                        markerType: "square",
-                        color: "#F08080",
-                        dataPoints: [
-                        { x: new Date(2010, 0, 3), y: 650 },
-                        { x: new Date(2010, 0, 5), y: 700 },
-                        { x: new Date(2010, 0, 7), y: 710 },
-                        { x: new Date(2010, 0, 9), y: 658 },
-                        { x: new Date(2010, 0, 11), y: 734 },
-                        { x: new Date(2010, 0, 13), y: 963 },
-                        { x: new Date(2010, 0, 15), y: 847 },
-                        { x: new Date(2010, 0, 17), y: 853 },
-                        { x: new Date(2010, 0, 19), y: 869 },
-                        { x: new Date(2010, 0, 21), y: 943 },
-                        { x: new Date(2010, 0, 23), y: 970 }
-                        ]
-                    },
-                    {
-                        type: "line",
-                        showInLegend: true,
-                        name: "Unique Visits",
-                        color: "#20B2AA",
-                        lineThickness: 2,
-
-                        dataPoints: [
-                        { x: new Date(2010, 0, 3), y: 510 },
-                        { x: new Date(2010, 0, 5), y: 560 },
-                        { x: new Date(2010, 0, 7), y: 540 },
-                        { x: new Date(2010, 0, 9), y: 558 },
-                        { x: new Date(2010, 0, 11), y: 544 },
-                        { x: new Date(2010, 0, 13), y: 693 },
-                        { x: new Date(2010, 0, 15), y: 657 },
-                        { x: new Date(2010, 0, 17), y: 663 },
-                        { x: new Date(2010, 0, 19), y: 639 },
-                        { x: new Date(2010, 0, 21), y: 673 },
-                        { x: new Date(2010, 0, 23), y: 660 }
-                        ]
-                    }
-                    ],
-                    legend: {
-                        cursor: "pointer",
-                        itemclick: function (e) {
-                            if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-                                e.dataSeries.visible = false;
-                            }
-                            else {
-                                e.dataSeries.visible = true;
-                            }
-                            chart.render();
-                        }
-                    }
-                });
-
-                chart.render();
+            // makes the date more readable
+            
+            function oklestiDatum(date) {
+                date = date.replace("T"," ").replace("","");
+                date = date.substring(0,16);
+                return date;
             }
             
-           
+            
+            function vrniCas(res, num) {
+
+                var tren = res[num];
+                tren = tren["#1"];
+                tren = tren.value;
+                tren = oklestiDatum(tren);
+                
+                return tren;             
+            }
+            
+            function vrniTezo(res, num) {
+                
+                var tren = res[num];
+                tren = tren["Weight"];
+                return tren.magnitude;
+                
+            }
+            
+            function vrniVodo(res, num) {
+                
+                var tren = res[num];
+                tren = tren["Total_water_percentage"];
+                return tren.magnitude;
+            }
+            
+            var plotArray = [['Date', 'Water Percentage', 'Weight']];
+            
+            function generateData(res) {
+                res = res.resultSet;
+
+                for(var i = 0; i < res.length; i++) {
+                    var cas = vrniCas(res, i);
+                    var teza = vrniTezo(res, i);
+                    var voda = (teza*vrniVodo(res, i)) / 100;
+                    
+                    var currentArray = [cas, voda, teza];
+                    
+                    plotArray.push(currentArray);
+                    
+                    // console.log(vrniCas(res, i));
+                    // console.log(vrniTezo(res, i));
+                    // console.log(vrniVodo(res, i));
+                    
+                }
+                console.log(plotArray);
+            }
+            
+            google.charts.load('current', {'packages':['corechart']});
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+                var data = google.visualization.arrayToDataTable(plotArray);
+
+                var options = {
+                  title: 'Measurements',
+                  curveType: 'function',
+                  legend: { position: 'bottom' }
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+                chart.draw(data, options);
+            }
             
             </script>
 
