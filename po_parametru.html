@@ -1,5 +1,10 @@
 </i></p>
                 </div>
+                <div class="col-md-4 text-center">
+                    <p>Enter date:</p>
+                    <input type="text" id="dateInput">
+                    <button class="btn-success" type="button" id="queryStart">GO!</button>
+                </div>
             </div>
         </div>
         
@@ -18,6 +23,12 @@
         <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type="text/javascript" src="lib/js/pickadate/lib/picker.js"></script>
+        <script type="text/javascript" src="lib/js/pickadate/lib/picker.date.js"></script>
+        <script type="text/javascript" src="lib/js/pickadate/lib/picker.time.js"></script>
+        <link rel="stylesheet" href="lib/js/pickadate/lib/themes/classic.css">
+        <link rel="stylesheet" href="lib/js/pickadate/lib/themes/classic.date.css">
+        <link rel="stylesheet" href="lib/js/pickadate/lib/themes/classic.time.css">
         
         <script>
             
@@ -62,12 +73,38 @@
             }
 
             var podatki;
+            var dateToQuery = "2016-07-13T09:57:26.346+02:00";
+            
+            var buttonToQuery = $('#queryStart');
+            
+            $('#dateInput').pickadate({
+                onSet: function() {
+                    dateToQuery = picker.get('select', 'yyyy/mm/dd');
+                    dateToQuery.replace("/","-");
+                    dateToQuery += "T00:00:00.000+02:00";
+                    queryAgain();
+                    drawChart();
+                }
+            });
             
             // AQL Query
             
-            var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'2016-07-13T09:57:26.346+02:00' offset 0 limit 10";
+            var aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'" + dateToQuery + "' offset 0 limit 10";
             
             // GET Request for AQL Query
+            
+            function queryAgain() {
+                $.ajax({
+                    url: baseUrl + "/query?" + $.param({"aql": aql}),
+                    type: 'GET',
+                    headers: {"Ehr-Session": sessionId},
+                    success: function (res) {
+
+                            podatki = generateData(res);
+
+                    }
+                });
+            }
             
             $.ajax({
                 url: baseUrl + "/query?" + $.param({"aql": aql}),
