@@ -49,7 +49,7 @@ function posredujStaticnoVsebino(odgovor, predpomnilnik, absolutnaPotDoDatoteke)
 
 var plotHtmlPrej = "";
 var ehrId = "";
-var plotHtmlPotem = "";
+var plotHtmlPotem1 = "", plotHtmlPotem2 = "";
 
 streznik.use(express.static('public'));
 
@@ -57,8 +57,12 @@ fs.readFile('do_parametra.html', 'utf8', function (err,data) {
   plotHtmlPrej = data;
 });
 
-fs.readFile('po_parametru.html', 'utf8', function (err,data) {
-  plotHtmlPotem = data;
+fs.readFile('po_parametru1.html', 'utf8', function (err,data) {
+  plotHtmlPotem1 = data;
+});
+
+fs.readFile('po_parametru2.html', 'utf8', function (err,data) {
+  plotHtmlPotem2 = data;
 });
 
 // attention, very secure stuff (just for demo tho)
@@ -77,7 +81,7 @@ streznik.post('/plot', function(req, res) {
     pass = req.body.lg_password;
     
     if (isValidPass(pass, passwordi)) {     
-        res.send(plotHtmlPrej + ehrId + plotHtmlPotem);
+        res.send(plotHtmlPrej + ehrId + plotHtmlPotem1 + ehrId + plotHtmlPotem2);
     } else {
         
         res.send("Your password ( "+pass+" ) is not correct.");
