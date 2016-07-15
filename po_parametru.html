@@ -87,9 +87,8 @@
               dateToQuery = picker.get('select', 'yyyy/mm/dd');
               dateToQuery = dateToQuery.split('/').join('-');
               dateToQuery += "T00:00:00.000+02:00";
-              aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'" + dateToQuery + "' offset 0 limit 10";
+              aql = "select     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value as Weight,     a/context/start_time,     e/ehr_id/value,     a_b/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value as Total_water_percentage from EHR e contains COMPOSITION a contains (     OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_weight.v1] and     OBSERVATION a_b[openEHR-EHR-OBSERVATION.body_water.v0]) where     e/ehr_id/value='50bc1c98-8540-4d86-bbc7-813f7c55377e' and     a/context/start_time>'" + dateToQuery + "' offset 0";
               query();
-              drawChart();
             });
 
             // GET Request for AQL Query
@@ -102,6 +101,7 @@
                     success: function (res) {
 
                             generateData(res);
+                            drawChart();
 
                     }
                 });
