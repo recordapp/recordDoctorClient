@@ -31,7 +31,7 @@
 
             query();
 
-            // makes the date more readable
+            // Makes the date more readable to the doctor's eyes.
 
             function oklestiDatum(date) {
                 date = date.replace("T"," ").replace("","");
@@ -39,6 +39,7 @@
                 return date;
             }
 
+            // Finds the date in JSON and returns it.
 
             function vrniCas(res, num) {
 
@@ -50,6 +51,8 @@
                 return tren;
             }
 
+            // Finds the weight in JSON and returns it.
+
             function vrniTezo(res, num) {
 
                 var tren = res[num];
@@ -58,6 +61,8 @@
 
             }
 
+            // Finds the water percentage in JSON and returns it.
+
             function vrniVodo(res, num) {
 
                 var tren = res[num];
@@ -65,30 +70,31 @@
                 return tren.magnitude;
             }
 
+            // Initialization of the first part of the plotting "table" array with data to draw.
+
             var plotArray = [['Date', 'Water weight', 'Weight']];
+
+            // Assembles the data array and passes it to the Google Charts drawing function.
 
             function generateData(res) {
 
                 res = res.resultSet;
                 plotArray = [['Date', 'Water weight', 'Weight']]
+
                 for(var i = 0; i < res.length; i++) {
+
                     var cas = vrniCas(res, i);
                     var teza = vrniTezo(res, i);
                     var voda = (teza*vrniVodo(res, i)) / 100;
                     var currentArray = [cas, voda, teza];
-
                     plotArray.push(currentArray);
-
-                    // console.log(vrniCas(res, i));
-                    // console.log(vrniTezo(res, i));
-                    // console.log(vrniVodo(res, i));
-
                 }
-                console.log(plotArray);
             }
 
             google.charts.load('current', {'packages':['corechart']});
             google.charts.setOnLoadCallback(drawChart);
+
+            // Google Charts drawing function.
 
             function drawChart() {
                 var data = google.visualization.arrayToDataTable(plotArray);
@@ -100,7 +106,6 @@
                 };
 
                 var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-                console.log("New graph is drawn");
                 chart.draw(data, options);
             }
 

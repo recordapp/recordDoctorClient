@@ -1,6 +1,10 @@
+// Sets the node.js server to work on port 8080
+
 if (!process.env.PORT) {
 	process.env.PORT = 8080;
 }
+
+// Library definitions
 
 var express = require('express');
 var streznik = express();
@@ -9,49 +13,20 @@ var bodyParser = require('body-parser');
 var fs  = require('fs');
 var path = require('path');
 var mime = require('mime');
-var predpomnilnik = {};
 
-// Streznik napisan vecidel na predavanjih doc. dr. Dejana Lavbica na FRI UNI-LJ, 2016
+streznik.use(bodyParser.urlencoded({ extended: true }));
 
-streznik.use(bodyParser.urlencoded({ extended: true })); 
-
-function posredujNapako404(odgovor) {
-	odgovor.writeHead(404, {'Content-Type': 'text/plain'});
-	odgovor.write('Napaka 404: Vira ni mogoče najti.');
-	odgovor.end();
-}
-
-function posredujDatoteko(odgovor, datotekaPot, datotekaVsebina) {
-	odgovor.writeHead(200, {"content-type": mime.lookup(path.basename(datotekaPot))});
-	odgovor.end(datotekaVsebina);
-}
-
-function posredujStaticnoVsebino(odgovor, predpomnilnik, absolutnaPotDoDatoteke) {
-	if (predpomnilnik[absolutnaPotDoDatoteke]) {
-		posredujDatoteko(odgovor, absolutnaPotDoDatoteke, predpomnilnik[absolutnaPotDoDatoteke]);
-	} else {
-		fs.exists(absolutnaPotDoDatoteke, function(datotekaObstaja) {
-			if (datotekaObstaja) {
-				fs.readFile(absolutnaPotDoDatoteke, function(napaka, datotekaVsebina) {
-					if (napaka) {
-						posredujNapako404(odgovor);
-					} else {
-						predpomnilnik[absolutnaPotDoDatoteke] = datotekaVsebina;
-						posredujDatoteko(odgovor, absolutnaPotDoDatoteke, datotekaVsebina);
-					}
-				});
-			} else {
-				posredujNapako404(odgovor);
-			}
-		});
-	}
-}
+// Initialization of variables that will store the HTML to be served later when plotting. [Indeed, we improvised]
+// The time we had was limited, so we couldn't configure rendering with templates.
 
 var plotHtmlPrej = "";
 var ehrId = "";
 var plotHtmlPotem1 = "", plotHtmlPotem2 = "";
 
 streznik.use(express.static('public'));
+
+// Reading templates from HTML files.
+// All the necesarry parameters get passed inbetween the code via concatenation later.
 
 fs.readFile('do_parametra.html', 'utf8', function (err,data) {
   plotHtmlPrej = data;
@@ -65,7 +40,8 @@ fs.readFile('po_parametru2.html', 'utf8', function (err,data) {
   plotHtmlPotem2 = data;
 });
 
-// attention, very secure stuff (just for demo tho)
+// Attention, very secure stuff (just for demonstration purposes).
+
 var passwordi = ["medrockweek1", "record>ostali"];
 
 function isValidPass(pass, passwords) {
@@ -75,25 +51,24 @@ function isValidPass(pass, passwords) {
     return false;
 }
 
+// When a password is entered, the parameters get passed into the HTML code
+// and everything then connects, and posts back to the browser.
+
 streznik.post('/plot', function(req, res) {
 
     ehrId = req.body.lg_patientid;
     pass = req.body.lg_password;
-    
-    if (isValidPass(pass, passwordi)) {     
+
+    if (isValidPass(pass, passwordi)) {
+				// Connects the html with parameters (didn't have the time to configure .ejs rendering or anything similar).
         res.send(plotHtmlPrej + ehrId + plotHtmlPotem1 + ehrId + plotHtmlPotem2);
     } else {
-        
-        res.send("Your password ( "+pass+" ) is not correct.");
+        res.send("Your password is not correct.");
     }
-
-    // res.send('You sent the name "' + req.body.lg_patientid + '".');
 });
 
-// Console log za potrditev starta serverja
+// Console log to show where and if the server started.
 
 streznik.listen(process.env.PORT, function() {
   console.log("Strežnik posluša na portu " + process.env.PORT + ".");
 });
-
-var plot = ""

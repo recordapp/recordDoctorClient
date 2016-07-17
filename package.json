@@ -4,8 +4,7 @@
 	"author": "reCORd app <recordapp.github.io>",
 	"dependencies": {
 		"express": "latest",
-		"sqlite3": "latest",
-        "body-parser": "latest",
-        "node-file-parser": "latest"
+    "body-parser": "latest",
+    "node-file-parser": "latest"
 	}
 }
