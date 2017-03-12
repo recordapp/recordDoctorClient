@@ -1,3 +1,5 @@
+# NOTE: The app is in a stage, ready solely for showcasing and idea describing purposes. No encription whatsoever.
+
 # reCORd Doctor's client
 
 This is the code for the doctor's side of things if him and his patient use our reCORd system. The web client for the doctor plots out all the necesarry data,
